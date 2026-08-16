@@ -21,6 +21,7 @@
         <module>eshop-service-defaults</module>
         <module>eshop-test-support</module>
         <module>eshop-foundation-smoke-app</module>
+        <module>catalog-service</module>
     </modules>
 
     <properties>
