@@ -10,8 +10,11 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -24,16 +27,21 @@ class CatalogDataSourceTest {
     private Environment environment;
 
     @Test
-    void connectsWithoutCreatingOrModifyingSchema() throws Exception {
+    void validatesExistingSchemaWithoutCreatingTables() throws Exception {
         assertEquals("validate", environment.getProperty("spring.jpa.hibernate.ddl-auto"));
-        try (Connection connection = dataSource.getConnection()) {
-            assertTrue(connection.isValid(5));
-            try (Statement statement = connection.createStatement();
-                 ResultSet tables = statement.executeQuery(
-                         "select count(*) from information_schema.tables where table_schema = 'public'")) {
-                tables.next();
-                assertEquals(0, tables.getInt(1), "Hibernate must not create or alter tables");
+        try (Connection connection = dataSource.getConnection();
+             Statement statement = connection.createStatement();
+             ResultSet tables = statement.executeQuery(
+                     "select table_name from information_schema.tables where table_schema = 'public'")) {
+            Set<String> names = new HashSet<>();
+            while (tables.next()) {
+                names.add(tables.getString(1));
             }
+            assertTrue(names.contains("Catalog"));
+            assertTrue(names.contains("CatalogBrand"));
+            assertTrue(names.contains("CatalogType"));
+            assertFalse(names.contains("catalog_item"));
+            assertFalse(names.contains("hibernate_sequence"));
         }
     }
 }

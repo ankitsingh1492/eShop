@@ -11,6 +11,8 @@ class PostgresTestConfiguration {
     @Bean
     @ServiceConnection
     PostgreSQLContainer postgres() {
-        return new PostgreSQLContainer(DockerImageName.parse("postgres:16-alpine"));
+        return new PostgreSQLContainer(
+                DockerImageName.parse("pgvector/pgvector:pg16").asCompatibleSubstituteFor("postgres"))
+                .withInitScript("catalog-ef-schema.sql");
     }
 }
