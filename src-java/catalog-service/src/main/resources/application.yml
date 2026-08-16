@@ -1,6 +1,10 @@
 spring:
   application:
     name: catalog-service
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
 
 management:
   health:
